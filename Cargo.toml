@@ -11,3 +11,11 @@ anyhow = "1"
 
 
 [dev-dependencies]
+
+[package.metadata.clippy]
+warn = [
+    "clippy::pedantic",
+    "clippy::nursery",
+    "clippy::unwrap_used",
+    "clippy::expect_used",
+]

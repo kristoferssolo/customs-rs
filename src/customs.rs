@@ -1,6 +1,6 @@
 use crate::{citizenship::CitizenshipType, officer::Officer};
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Customs {
     pub citizens: Vec<Officer>,
     pub noncitizens: Vec<Officer>,

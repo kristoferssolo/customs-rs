@@ -34,8 +34,8 @@ pub fn parse_input(input: &str) -> Result<Output, ParseError> {
         .noncitizens
         .reserve_exact(first.noncitizen.count as usize);
 
-    while let Some(line) = lines.next() {
-        if line.contains("X") {
+    for line in lines {
+        if line.contains('X') {
             break;
         };
         if let Ok(officer) = Officer::from_str(line) {

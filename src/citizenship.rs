@@ -2,10 +2,16 @@ use std::str::FromStr;
 
 use crate::{error::InputError, utils::Time};
 
-#[derive(Debug, PartialEq, Eq, Clone, Copy, PartialOrd)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum CitizenshipType {
     Citizen,
     NonCitizen,
+}
+
+impl PartialOrd for CitizenshipType {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
 }
 
 impl Ord for CitizenshipType {

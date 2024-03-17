@@ -35,7 +35,7 @@ impl Officer {
 
 impl PartialOrd for Officer {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        self.id.partial_cmp(&other.id)
+        Some(self.id.cmp(&other.id))
     }
 }
 
@@ -52,7 +52,7 @@ impl FromStr for Officer {
 
         match (iter.next(), iter.next(), iter.next(), iter.next()) {
             (Some("T"), Some(citizenship_type), Some(customs_num), Some(time)) => {
-                let citizenship = CitizenshipType::from_str(&citizenship_type)?;
+                let citizenship = CitizenshipType::from_str(citizenship_type)?;
                 let time = time
                     .parse::<Time>()
                     .map_err(|_| InputError::InvalidFormat)?;

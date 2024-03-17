@@ -31,7 +31,7 @@ impl OutputTime {
 
 impl PartialOrd for OutputTime {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        self.departure_time.partial_cmp(&other.departure_time)
+        Some(self.departure_time.cmp(&other.departure_time))
     }
 }
 
