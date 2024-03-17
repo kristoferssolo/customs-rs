@@ -35,8 +35,10 @@ impl From<Data> for Output {
 
         for citizen in &value.citizens {
             let time = match citizen.type_ {
-                CitizenshipType::Citizen => foo(&citizen, &mut citizens),
-                CitizenshipType::NonCitizen => foo(&citizen, &mut noncitizens),
+                CitizenshipType::Citizen => process_citizenship_entry(&citizen, &mut citizens),
+                CitizenshipType::NonCitizen => {
+                    process_citizenship_entry(&citizen, &mut noncitizens)
+                }
             };
             outputs.push(time);
         }
@@ -69,7 +71,7 @@ fn calculate_departure_time(officer: &mut Officer, arrival_time: Time) -> Time {
     }
 }
 
-fn foo(citizen: &Citizenship, customs: &mut Vec<Officer>) -> OutputTime {
+fn process_citizenship_entry(citizen: &Citizenship, customs: &mut Vec<Officer>) -> OutputTime {
     let arrival_time = citizen.arrival_time;
 
     let officer = customs
