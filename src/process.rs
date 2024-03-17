@@ -7,15 +7,16 @@ use crate::{
     error::ParseError,
     officer::Officer,
     output::Output,
+    utils::Data,
 };
 
 pub fn process(input: &str) -> String {
     match parse_input(input) {
-        Ok(data) => data.into(),
-        Err(e) => {
-            println!("Error: {e}");
-            "nothing\n".into()
+        Ok(mut data) => {
+            data.sort();
+            data.into()
         }
+        Err(_) => "nothing\n".into(),
     }
 }
 
@@ -49,7 +50,6 @@ pub fn parse_input(input: &str) -> Result<Output, ParseError> {
         return Err(ParseError::NoCitizens);
     }
 
-    let mut citizen_customs_new = Vec::new();
     for customs_id in 1..=first.citizen.count {
         if customs
             .citizens
@@ -59,10 +59,9 @@ pub fn parse_input(input: &str) -> Result<Output, ParseError> {
             continue;
         }
         let new = Officer::new(customs_id, first.citizen.time, CitizenshipType::Citizen);
-        citizen_customs_new.push(new);
+        customs.citizens.push(new);
     }
 
-    let mut noncitizen_customs_new = Vec::new();
     for customs_id in 1..=first.noncitizen.count {
         if customs
             .noncitizens
@@ -76,11 +75,9 @@ pub fn parse_input(input: &str) -> Result<Output, ParseError> {
             first.noncitizen.time,
             CitizenshipType::NonCitizen,
         );
-        noncitizen_customs_new.push(new);
+        customs.noncitizens.push(new);
     }
 
-    customs.citizens.extend(citizen_customs_new);
-    customs.noncitizens.extend(noncitizen_customs_new);
-
-    Ok(Output::new(customs, citizens))
+    let data = Data::new(customs, citizens);
+    Ok(Output::from(data))
 }

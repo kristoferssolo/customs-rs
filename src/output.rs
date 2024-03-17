@@ -1,52 +1,44 @@
-use std::{cmp, fmt::Display};
+use std::fmt::Display;
 
 use crate::{
     citizenship::{Citizenship, CitizenshipType},
-    customs::Customs,
     officer::Officer,
-    utils::Time,
+    output_time::OutputTime,
+    utils::{Data, Time},
 };
 
 #[derive(Debug)]
 pub struct Output(Vec<OutputTime>);
 
-#[derive(Debug)]
-pub struct OutputTime {
-    input: Time,
-    output: Time,
-}
-
 impl Output {
-    pub fn new(mut customs: Customs, all_citizens: Vec<Citizenship>) -> Self {
-        customs.sort();
-        dbg!(&customs);
-        let citizens = Self::from((&customs.citizens, &all_citizens, CitizenshipType::Citizen));
-        let noncitizens = Self::from((
-            &customs.noncitizens,
-            &all_citizens,
-            CitizenshipType::NonCitizen,
-        ));
-        let mut output = Vec::new();
-        output.extend(citizens.0);
-        output.extend(noncitizens.0);
-        Self(output)
+    pub fn sort(&mut self) {
+        // first by departure time, then by CitizenshipType (citizens first), then by Officer id
+        self.0.sort_by(|a, b| {
+            let departure_time_cmp = a.departure_time.cmp(&b.departure_time);
+            if departure_time_cmp.is_ne() {
+                return departure_time_cmp;
+            }
+            let citizenship_cmp = a.citizenship.cmp(&b.citizenship);
+            if citizenship_cmp.is_ne() {
+                return citizenship_cmp;
+            }
+            a.officer_id.cmp(&b.officer_id)
+        });
     }
 }
 
-impl From<(&Vec<Officer>, &Vec<Citizenship>, CitizenshipType)> for Output {
-    fn from(value: (&Vec<Officer>, &Vec<Citizenship>, CitizenshipType)) -> Self {
-        let (customs, citizens, type_) = value;
+impl From<Data> for Output {
+    fn from(value: Data) -> Self {
         let mut outputs = Vec::new();
-        for officer in customs {
-            let mut prev = 0;
-            for citizen in citizens {
-                if citizen.type_ == officer.citizenship && citizen.type_ == type_ {
-                    let output_ = officer.time + cmp::max(citizen.id, prev);
-                    let output = OutputTime::new(citizen.id, output_);
-                    outputs.push(output);
-                    prev = output_;
-                }
-            }
+        let mut citizens = value.customs.citizens;
+        let mut noncitizens = value.customs.noncitizens;
+
+        for citizen in &value.citizens {
+            let time = match citizen.type_ {
+                CitizenshipType::Citizen => foo(&citizen, &mut citizens),
+                CitizenshipType::NonCitizen => foo(&citizen, &mut noncitizens),
+            };
+            outputs.push(time);
         }
         Self(outputs)
     }
@@ -69,14 +61,37 @@ impl Into<String> for Output {
     }
 }
 
-impl OutputTime {
-    pub fn new(input: Time, output: Time) -> Self {
-        Self { input, output }
+fn calculate_departure_time(officer: &mut Officer, arrival_time: Time) -> Time {
+    if arrival_time > officer.departure_time {
+        arrival_time + officer.processing_time
+    } else {
+        officer.potential_departure_time()
     }
 }
 
-impl Display for OutputTime {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} {}", self.input, self.output)
-    }
+fn foo(citizen: &Citizenship, customs: &mut Vec<Officer>) -> OutputTime {
+    let arrival_time = citizen.arrival_time;
+
+    let officer = customs
+        .iter_mut()
+        .filter(|officer| officer.departure_time == 0 || arrival_time >= officer.departure_time)
+        .min_by_key(|officer| officer.id);
+
+    let officer = match officer {
+        Some(x) => x,
+        None => customs
+            .iter_mut()
+            .min_by_key(|officer| (officer.departure_time, officer.id))
+            .unwrap(),
+    };
+
+    let departure_time = calculate_departure_time(officer, arrival_time);
+
+    officer.departure_time = departure_time;
+    OutputTime::new(
+        arrival_time,
+        departure_time,
+        officer.citizenship,
+        officer.id,
+    )
 }

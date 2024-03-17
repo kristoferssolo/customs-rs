@@ -2,10 +2,20 @@ use std::str::FromStr;
 
 use crate::{error::InputError, utils::Time};
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, PartialOrd)]
 pub enum CitizenshipType {
     Citizen,
     NonCitizen,
+}
+
+impl Ord for CitizenshipType {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        match (self, other) {
+            (CitizenshipType::Citizen, CitizenshipType::NonCitizen) => std::cmp::Ordering::Less,
+            (CitizenshipType::NonCitizen, CitizenshipType::Citizen) => std::cmp::Ordering::Greater,
+            _ => std::cmp::Ordering::Equal,
+        }
+    }
 }
 
 impl FromStr for CitizenshipType {
@@ -21,13 +31,16 @@ impl FromStr for CitizenshipType {
 
 #[derive(Debug)]
 pub struct Citizenship {
-    pub id: Time,
+    pub arrival_time: Time,
     pub type_: CitizenshipType,
 }
 
 impl Citizenship {
-    pub fn new(id: Time, type_: CitizenshipType) -> Self {
-        Self { id, type_ }
+    pub fn new(arrival_time: Time, type_: CitizenshipType) -> Self {
+        Self {
+            arrival_time,
+            type_,
+        }
     }
 }
 
@@ -40,7 +53,10 @@ impl FromStr for Citizenship {
             (Some(citizenship), Some(id)) => {
                 let id = id.parse::<Time>().map_err(|_| InputError::InvalidFormat)?;
                 let type_ = CitizenshipType::from_str(citizenship)?;
-                Ok(Self { id, type_ })
+                Ok(Self {
+                    arrival_time: id,
+                    type_,
+                })
             }
             _ => Err(InputError::InvalidFormat),
         }

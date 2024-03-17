@@ -4,5 +4,6 @@ pub mod customs_info;
 pub mod error;
 pub mod officer;
 pub mod output;
+pub mod output_time;
 pub mod process;
 pub mod utils;

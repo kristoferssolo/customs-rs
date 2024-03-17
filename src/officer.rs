@@ -6,10 +6,11 @@ use crate::{
     utils::{CustomsCount, Time},
 };
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Officer {
     pub id: CustomsCount,
-    pub time: Time,
+    pub processing_time: Time,
+    pub departure_time: Time,
     pub citizenship: CitizenshipType,
 }
 
@@ -17,9 +18,18 @@ impl Officer {
     pub fn new(id: CustomsCount, time: Time, citizenship: CitizenshipType) -> Self {
         Self {
             id,
-            time,
+            processing_time: time,
+            departure_time: 0,
             citizenship,
         }
+    }
+
+    pub fn potential_departure_time(&self) -> Time {
+        self.processing_time + self.departure_time
+    }
+
+    pub fn filter_departure_time(&self, num: Time) -> bool {
+        self.departure_time == 0 || self.departure_time == num
     }
 }
 
@@ -52,7 +62,8 @@ impl FromStr for Officer {
                 Ok(Self {
                     id,
                     citizenship,
-                    time,
+                    departure_time: 0,
+                    processing_time: time,
                 })
             }
             _ => Err(InputError::InvalidFormat),
