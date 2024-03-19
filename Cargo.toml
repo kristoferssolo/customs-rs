@@ -8,9 +8,15 @@ edition = "2021"
 [dependencies]
 thiserror = "1"
 anyhow = "1"
-
+dhat = "0.3"
 
 [dev-dependencies]
+
+[profile.release]
+debug = 1
+
+[features]
+dhat = []
 
 [package.metadata.clippy]
 warn = [

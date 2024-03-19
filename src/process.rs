@@ -59,7 +59,7 @@ pub fn parse_input(input: &str) -> Result<Output, ParseError> {
             continue;
         }
         let new = Officer::new(customs_id, first.citizen.time, CitizenshipType::Citizen);
-        customs.citizens.push(new);
+        customs.push(new);
     }
 
     for customs_id in 1..=first.noncitizen.count {
@@ -75,7 +75,7 @@ pub fn parse_input(input: &str) -> Result<Output, ParseError> {
             first.noncitizen.time,
             CitizenshipType::NonCitizen,
         );
-        customs.noncitizens.push(new);
+        customs.push(new);
     }
 
     let data = Data::new(customs, citizens);
